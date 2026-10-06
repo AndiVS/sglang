@@ -1296,6 +1296,7 @@ def test_linker_load_preserves_swa_boundaries(
             )
         ),
         resolve_node_handle=lambda node_id: SimpleNamespace(id=0),
+        prefix_device_indices=lambda req: torch.empty(0, dtype=torch.int64),
     )
     wrapper = UnifiedCacheLinkerWrapper(cache, _FakeLinker())
     wrapper.hit_markers["rid"] = ExternalCacheHitMarker(
