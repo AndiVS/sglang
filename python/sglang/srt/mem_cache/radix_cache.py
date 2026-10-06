@@ -522,7 +522,7 @@ class RadixCache(BasePrefixCache):
             new_indices[req.kv.cache_protected_len :],
         )
 
-        # With page_size > 1 the partial page sits in req.prefix_len but not
+        # With page_size > 1 the partial page stays in the request's row but not
         # in the tree; cache_protected_len marks the tree-owned part so the next
         # checkpoint or release_kv_cache frees the rest.
         req.kv.cache_protected_len = len(new_indices)

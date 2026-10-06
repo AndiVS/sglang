@@ -3668,11 +3668,8 @@ class Scheduler(
             # only finished requests to running_batch.
             chunked_req_to_exclude.add(self.chunked_req)
 
-            # Stash (cache) the previous chunk only when it produced new KV
-            # beyond what is already cached. A parked chunk (add_chunked_req
-            # hybrid-SWA early-return) leaves extend_range.end ==
-            # prefix_len, so there is nothing new to cache and
-            # stashing would be a no-op.
+            # A parked chunk (add_chunked_req hybrid-SWA early-return) leaves
+            # extend_range.end at prefix_len: it computed no new KV, so nothing to stash.
             if self.chunked_req.extend_range.end > self.chunked_req.prefix_len:
                 self.stash_chunked_request(self.chunked_req)
 
