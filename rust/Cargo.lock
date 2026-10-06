@@ -3813,6 +3813,7 @@ dependencies = [
  "serde_json",
  "sglang-grpc-types",
  "sglang-mm",
+ "sglang-processor",
  "socket2 0.6.5",
  "thiserror",
  "tokio",
