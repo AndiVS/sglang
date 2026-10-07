@@ -3725,6 +3725,7 @@ class UnifiedRadixCache(BasePrefixCache):
     def prefix_device_indices(self, req: Req) -> torch.Tensor:
         root = self.root_node_handle(req.extra_key)
         path = self.tree_core.collect_full_device_indices(req.last_node, root)
+        assert len(path) >= req.prefix_len, (req.rid, len(path), req.prefix_len)
         return path[: req.prefix_len]
 
     def root_node_handle(self, extra_key: Optional[str] = None) -> NodeId:
