@@ -631,7 +631,9 @@ class RadixCache(BasePrefixCache):
             values.append(node.value)
             node = node.parent
         values.reverse()
-        return torch.cat(values)[: req.prefix_len]
+        path = torch.cat(values)
+        assert len(path) >= req.prefix_len, (req.rid, len(path), req.prefix_len)
+        return path[: req.prefix_len]
 
     def _match_prefix_helper(self, node: TreeNode, key: RadixKey):
         access_time = time.monotonic()

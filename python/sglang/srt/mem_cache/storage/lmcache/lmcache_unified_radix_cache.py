@@ -88,13 +88,17 @@ class LMCacheUnifiedRadixCache(UnifiedRadixCache):
         return True
 
     def prefix_device_indices(self, req: Req) -> torch.Tensor:
-        indices = super().prefix_device_indices(req)
+        # match_prefix may append loaded slots not yet published to the tree,
+        # so the path alone can be shorter than the prefix.
+        root = self.root_node_handle(req.extra_key)
+        path = self.tree_core.collect_full_device_indices(req.last_node, root)
+        indices = path[: req.prefix_len]
         missing = req.prefix_len - len(indices)
         if missing > 0:
-            # match_prefix appended loaded slots not yet published to the tree.
             load = self._external_flows[req.rid].load
             skip = max(len(indices) - load.local_hit_tokens, 0)
             indices = torch.cat([indices, load.device_indices[skip : skip + missing]])
+        assert len(indices) == req.prefix_len, (req.rid, len(indices), req.prefix_len)
         return indices
 
     def match_prefix(self, params: MatchPrefixParams) -> MatchResult:
