@@ -4,8 +4,6 @@ import logging
 from array import array
 from typing import TYPE_CHECKING, List, Optional, Set, Union
 
-import torch
-
 from sglang.srt.dllm.config import DllmConfig
 from sglang.srt.dllm.mixin.req import DllmReqPhase
 from sglang.srt.managers.schedule_batch import FINISH_LENGTH, Req, ScheduleBatch
@@ -219,10 +217,6 @@ class SchedulerDllmMixin:
         else:
             self.stash_chunked_request(req)
             if fdfo_mode:
-                # The row goes back to the pool; keep the prefix KV indices so
-                # the next block can be allocated without a row.
-                row = self.req_to_token_pool.req_to_token[req.kv.req_pool_idx]
-                req.set_prefix_indices(row[: req.prefix_len].to(torch.int64))
                 self.req_to_token_pool.free(req)
 
     def _fetch_waiting_reqs(self: Scheduler):
