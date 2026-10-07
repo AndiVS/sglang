@@ -85,16 +85,14 @@ def resolve_linear_parallel_group(
     return get_group_rank_size(_resolve_linear_group(parallel_group))
 
 
-@dataclass(frozen=True)
-class _LogicalGroup:
+class _LogicalGroup(msgspec.Struct, frozen=True):
     """Own a weight partition before distributed communication is initialized."""
 
     rank_in_group: int
     world_size: int
 
 
-@dataclass(frozen=True)
-class _ReplicatedGroup:
+class _ReplicatedGroup(msgspec.Struct, frozen=True):
     group: GroupCoordinator | _LogicalGroup
     replica_size: int
 
