@@ -37,7 +37,10 @@ from sglang.srt.layers.logits_processor import LogitsProcessor
 from sglang.srt.layers.moe.fused_moe_triton.layer import FusedMoE
 from sglang.srt.layers.quantization.base_config import QuantizationConfig
 from sglang.srt.layers.utils import PPMissingLayer
-from sglang.srt.layers.vocab_parallel_embedding import ParallelLMHead
+from sglang.srt.layers.vocab_parallel_embedding import (
+    ParallelLMHead,
+    get_embedding_weight_for_draft,
+)
 from sglang.srt.managers.mm_utils import (
     MultiModalityDataPaddingPatternMultimodalTokens,
     general_mm_embed_routine,
@@ -1115,6 +1118,11 @@ class Gemma4ForConditionalGeneration(PreTrainedModel):
             )
         embed = self.language_model.embed_tokens.weight
         # a materialized lm_head is loaded from this very tensor, so it is exact
+        return embed, embed
+
+    def get_embed_and_head_for_draft(self, draft_embedding):
+        embed, _ = self.get_embed_and_head()
+        embed = get_embedding_weight_for_draft(embed, draft_embedding)
         return embed, embed
 
     def set_eagle3_layers_to_capture(self, layer_ids: Optional[List[int]] = None):

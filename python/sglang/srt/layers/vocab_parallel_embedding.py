@@ -610,3 +610,31 @@ class ParallelLMHead(VocabParallelEmbedding):
     def forward(self, input_):
         del input_
         raise RuntimeError("LMHead's weights should be used in the sampler.")
+
+
+def get_embedding_weight_for_draft(
+    weight: torch.Tensor, draft_embedding: torch.nn.Module
+) -> torch.Tensor:
+    """Export a full vocabulary in the recipient's native embedding layout."""
+    if isinstance(draft_embedding, torch.nn.Embedding):
+        if weight.shape[0] != draft_embedding.num_embeddings:
+            raise ValueError("Target and draft embedding vocabularies must match")
+        return weight
+    if not isinstance(draft_embedding, VocabParallelEmbedding):
+        raise TypeError(
+            f"Unsupported draft embedding: {type(draft_embedding).__name__}"
+        )
+    if weight.shape[0] != draft_embedding.org_vocab_size:
+        raise ValueError("Target and draft embedding vocabularies must match")
+    indices = draft_embedding.shard_indices
+    if (
+        indices.org_vocab_start_index == 0
+        and indices.org_vocab_end_index == weight.shape[0]
+        and draft_embedding.num_embeddings_per_partition == weight.shape[0]
+    ):
+        return weight
+    shard = weight[indices.org_vocab_start_index : indices.org_vocab_end_index]
+    padding = draft_embedding.num_embeddings_per_partition - shard.shape[0]
+    if padding == 0:
+        return shard
+    return torch.nn.functional.pad(shard, (0, 0, 0, padding))
