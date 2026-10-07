@@ -25,7 +25,6 @@ def _make_req(
     req_pool_idx: int,
     fill_ids: list,
     prefix_len: int,
-    extend_input_len: int,
     fill_len: int,
 ) -> Req:
     req = Req.__new__(Req)
@@ -131,7 +130,6 @@ class TestStashGatePreservesPrefix(CustomTestCase):
             req_pool_idx=self.POOL_IDX,
             fill_ids=list(range(self.POST_RESET_FILL_LEN)),
             prefix_len=self.INITIAL_PREFIX_LEN,
-            extend_input_len=fill_len - self.INITIAL_PREFIX_LEN,
             fill_len=fill_len,
         )
         s = _scheduler_for_get_next_batch(tree_cache=cache, chunked_req=req)

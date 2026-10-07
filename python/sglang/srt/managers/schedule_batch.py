@@ -3124,6 +3124,8 @@ class ScheduleBatch(ScheduleBatchDisaggregationDecodeMixin):
             running_batch.reqs, running_prefix_lens, strict=True
         ):
             req.refresh_fill_ids()
+            # req.prefix_len still ends at the last prefill, so req.extend_len is
+            # not 1 here; this row's prefix and extend length live on the batch.
             req.extend_end = prefix_len + 1
 
         # Decode tokens of the running portion live in future_map.output_tokens_buf.
@@ -3204,6 +3206,7 @@ class ScheduleBatch(ScheduleBatchDisaggregationDecodeMixin):
             req.refresh_fill_ids()
             # end runs one past full_untruncated_fill_ids while output_ids
             # trails; safe only while decoding_reqs suppresses the checkpoint insert.
+            # As in mix_with_running, read prefix and extend length off the batch.
             req.extend_end = seq_len
 
         self.prefix_lens = [seq_len - 1 for seq_len in seq_lens]
